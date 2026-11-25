@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext.jsx";
 import { getAuthErrorMessage, signInAdmin } from "../lib/auth.js";
 
 export default function LoginPage() {
-  const { isConfigured } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -43,18 +41,6 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {!isConfigured && (
-          <div className="mb-6 rounded-lg border border-[#243B53]/30 bg-[#243B53]/5 p-4 text-sm text-[#243B53]">
-            <p className="font-medium">Firebase configuration required</p>
-            <p className="mt-1 text-xs leading-relaxed text-[#243B53]/80">
-              Copy <code className="font-mono">.env.example</code> to{" "}
-              <code className="font-mono">.env</code> and fill in your{" "}
-              <code className="font-mono">VITE_FIREBASE_*</code> credentials, then
-              restart the dev server.
-            </p>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
@@ -71,7 +57,7 @@ export default function LoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="admin"
-              disabled={!isConfigured || submitting}
+              disabled={submitting}
               className="mt-1.5 w-full rounded-lg border border-[#243B53]/25 bg-[#F7F5F0] px-3.5 py-2.5 text-sm text-[#243B53] placeholder:text-[#243B53]/40 focus:border-[#43A6A1] focus:outline-none disabled:opacity-60"
             />
           </div>
@@ -91,7 +77,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              disabled={!isConfigured || submitting}
+              disabled={submitting}
               className="mt-1.5 w-full rounded-lg border border-[#243B53]/25 bg-[#F7F5F0] px-3.5 py-2.5 text-sm text-[#243B53] placeholder:text-[#243B53]/40 focus:border-[#43A6A1] focus:outline-none disabled:opacity-60"
             />
           </div>
@@ -107,7 +93,7 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            disabled={!isConfigured || submitting}
+            disabled={submitting}
             className="w-full rounded-lg bg-[#243B53] px-4 py-2.5 text-sm font-medium text-[#F7F5F0] hover:bg-[#243B53]/90 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? "Signing in..." : "Sign In"}
