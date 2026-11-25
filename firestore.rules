@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Update this email if your single Firebase admin user uses a different email address
+    // (must match VITE_ADMIN_EMAIL / VITE_ADMIN_USERNAME@VITE_ADMIN_EMAIL_DOMAIN).
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == "admin@residency.local";
+    }
+
+    function isValidRoom(roomNumber) {
+      return roomNumber in ["101", "102", "103", "104", "105", "106", "107"];
+    }
+
+    function isValidBooking(data) {
+      return data.keys().hasAll([
+          "guestName",
+          "phoneNumber",
+          "roomNumber",
+          "checkInDate",
+          "checkOutDate",
+          "guestsCount",
+          "createdAt",
+          "updatedAt"
+        ])
+        && data.guestName is string
+        && data.guestName.size() > 0
+        && data.phoneNumber is string
+        && data.phoneNumber.size() > 0
+        && data.roomNumber is string
+        && isValidRoom(data.roomNumber)
+        && data.checkInDate is string
+        && data.checkInDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.checkOutDate is string
+        && data.checkOutDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && data.checkOutDate > data.checkInDate
+        && data.guestsCount is number
+        && data.guestsCount >= 1
+        && (!("amount" in data) || data.amount == null || (data.amount is number && data.amount >= 0))
+        && (!("notes" in data) || data.notes is string);
+    }
+
+    match /bookings/{bookingId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidBooking(request.resource.data);
+      allow update: if isAdmin() && isValidBooking(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
